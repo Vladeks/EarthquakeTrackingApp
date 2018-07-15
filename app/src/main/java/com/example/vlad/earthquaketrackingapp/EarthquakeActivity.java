@@ -1,7 +1,9 @@
 package com.example.vlad.earthquaketrackingapp;
 
 import android.databinding.DataBindingUtil;
+import android.graphics.drawable.GradientDrawable;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,7 +13,11 @@ import android.view.ViewGroup;
 
 import com.example.vlad.earthquaketrackingapp.databinding.EarthquakeItemBinding;
 
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -22,24 +28,18 @@ public class EarthquakeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_earthquake);
 
-        ArrayList<Earthquake> earthquakes = new ArrayList<>();
-        earthquakes.add(new Earthquake("7.2", "San Francisco", "Feb 2, 2016"));
-        earthquakes.add(new Earthquake("6.1", "London", "July 20, 2015"));
-        earthquakes.add(new Earthquake("3.9", "Tokyo", "Nov 10, 2014"));
-        earthquakes.add(new Earthquake("5.4", "Mexico City", "May 3, 2014"));
-        earthquakes.add(new Earthquake("2.8", "Moscow", "Jan 31, 2013"));
-        earthquakes.add(new Earthquake("4.9", "Rio de Janeiro", "Aug 19, 2012"));
-        earthquakes.add(new Earthquake("1.6", "Paris", "Oct 30, 2011"));
+
         RecyclerView rv = (RecyclerView) findViewById(R.id.rvQuakeList);
         rv.setLayoutManager(new LinearLayoutManager(this));
         EarthquakeAdapter adapter = new EarthquakeAdapter();
-        adapter.setData(earthquakes);
+        adapter.setData(QueryUtils.extractEarthquakes());
         rv.setAdapter(adapter);
 
     }
 
     class EarthquakeHolder extends RecyclerView.ViewHolder {
 
+        private static final String LOCATION_SEPARATOR = " of ";
         EarthquakeItemBinding binding;
 
         public EarthquakeHolder(EarthquakeItemBinding binding) {
@@ -47,9 +47,87 @@ public class EarthquakeActivity extends AppCompatActivity {
             this.binding = binding;
         }
 
-        public void bind(Earthquake employee) {
-            binding.setEarthquake(employee);
+        public void bind(Earthquake earthquake) {
+
+            binding.setEarthquake(earthquake);
+            binding.magnitude.setText(formatMagnitude(earthquake.getMagnitude()));
+
+            Date date = new Date(earthquake.getTimeInMilliseconds());
+            binding.date.setText(formatDate(date));
+            binding.time.setText(formatTime(date));
+
+            String primaryLocation, locationOffset;
+            if (earthquake.getLocation().contains(LOCATION_SEPARATOR)) {
+                String[] parts = earthquake.getLocation().split(LOCATION_SEPARATOR);
+                locationOffset = parts[0] + LOCATION_SEPARATOR;
+                primaryLocation = parts[1];
+            } else {
+                locationOffset = binding.getRoot().getContext().getString(R.string.near_the);
+                primaryLocation = earthquake.getLocation();
+            }
+            binding.locationOffset.setText(locationOffset);
+            binding.primaryLocation.setText(primaryLocation);
+
+
+            GradientDrawable magnitudeCircle = (GradientDrawable) binding.magnitude.getBackground();
+            int magnitudeColor = getMagnitudeColor(earthquake.getMagnitude());
+            magnitudeCircle.setColor(magnitudeColor);
+
             binding.executePendingBindings();
+        }
+
+        private int getMagnitudeColor(double magnitude) {
+            int magnitudeColorResourceId;
+            int magnitudeFloor = (int) Math.floor(magnitude);
+            switch (magnitudeFloor) {
+                case 0:
+                case 1:
+                    magnitudeColorResourceId = R.color.magnitude1;
+                    break;
+                case 2:
+                    magnitudeColorResourceId = R.color.magnitude2;
+                    break;
+                case 3:
+                    magnitudeColorResourceId = R.color.magnitude3;
+                    break;
+                case 4:
+                    magnitudeColorResourceId = R.color.magnitude4;
+                    break;
+                case 5:
+                    magnitudeColorResourceId = R.color.magnitude5;
+                    break;
+                case 6:
+                    magnitudeColorResourceId = R.color.magnitude6;
+                    break;
+                case 7:
+                    magnitudeColorResourceId = R.color.magnitude7;
+                    break;
+                case 8:
+                    magnitudeColorResourceId = R.color.magnitude8;
+                    break;
+                case 9:
+                    magnitudeColorResourceId = R.color.magnitude9;
+                    break;
+                default:
+                    magnitudeColorResourceId = R.color.magnitude10plus;
+                    break;
+            }
+            return ContextCompat.getColor(binding.getRoot().getContext(), magnitudeColorResourceId);
+        }
+
+        private String formatMagnitude(double magnitude) {
+            DecimalFormat format = new DecimalFormat("0.0");
+            return format.format(magnitude);
+        }
+
+        private String formatDate(Date date) {
+            DateFormat format = new SimpleDateFormat("LLL dd, yyyy");
+            return format.format(date);
+        }
+
+        private String formatTime(Date date) {
+            SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a");
+            return timeFormat.format(date);
         }
 
     }

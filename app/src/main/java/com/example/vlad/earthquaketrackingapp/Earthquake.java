@@ -1,24 +1,31 @@
 package com.example.vlad.earthquaketrackingapp;
 
-import java.util.Objects;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Earthquake {
 
-    private String magnitude;
-    private String location;
-    private String time;
+    private static final String LOCATION_SEPARATOR = " of ";
 
-    public Earthquake(String magnitude, String location, String time) {
+    private double magnitude;
+    private String location;
+    private long timeInMilliseconds;
+    private String url;
+
+    public Earthquake(double magnitude, String location, long timeInMilliseconds, String url) {
         this.magnitude = magnitude;
         this.location = location;
-        this.time = time;
+        this.timeInMilliseconds = timeInMilliseconds;
+        this.url = url;
     }
 
-    public String getMagnitude() {
+    public double getMagnitude() {
         return magnitude;
     }
 
-    public void setMagnitude(String magnitude) {
+    public void setMagnitude(double magnitude) {
         this.magnitude = magnitude;
     }
 
@@ -30,27 +37,20 @@ public class Earthquake {
         this.location = location;
     }
 
-    public String getTime() {
-        return time;
+    public long getTimeInMilliseconds() {
+        return timeInMilliseconds;
     }
 
-    public void setTime(String time) {
-        this.time = time;
+    public void setTimeInMilliseconds(long timeInMilliseconds) {
+        this.timeInMilliseconds = timeInMilliseconds;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Earthquake that = (Earthquake) o;
-        return Objects.equals(magnitude, that.magnitude) &&
-                Objects.equals(location, that.location) &&
-                Objects.equals(time, that.time);
+    public String getUrl() {
+        return url;
     }
 
-    @Override
-    public int hashCode() {
-
-        return Objects.hash(magnitude, location, time);
+    public void setUrl(String url) {
+        this.url = url;
     }
+
 }

@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">EarthquakeTrackingApp</string>
+    <string name="near_the">Near of</string>
+
 </resources>
