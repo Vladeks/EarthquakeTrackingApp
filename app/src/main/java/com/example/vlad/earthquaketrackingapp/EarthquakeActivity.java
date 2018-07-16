@@ -1,7 +1,9 @@
 package com.example.vlad.earthquaketrackingapp;
 
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -9,6 +11,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.vlad.earthquaketrackingapp.databinding.EarthquakeItemBinding;
@@ -47,7 +50,7 @@ public class EarthquakeActivity extends AppCompatActivity {
             this.binding = binding;
         }
 
-        public void bind(Earthquake earthquake) {
+        public void bind(final Earthquake earthquake) {
 
             binding.setEarthquake(earthquake);
             binding.magnitude.setText(formatMagnitude(earthquake.getMagnitude()));
@@ -72,6 +75,15 @@ public class EarthquakeActivity extends AppCompatActivity {
             GradientDrawable magnitudeCircle = (GradientDrawable) binding.magnitude.getBackground();
             int magnitudeColor = getMagnitudeColor(earthquake.getMagnitude());
             magnitudeCircle.setColor(magnitudeColor);
+
+            binding.getRoot().setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent i = new Intent(Intent.ACTION_VIEW);
+                    i.setData(Uri.parse(earthquake.getUrl()));
+                    startActivity(i);
+                }
+            });
 
             binding.executePendingBindings();
         }
@@ -158,6 +170,7 @@ public class EarthquakeActivity extends AppCompatActivity {
         public int getItemCount() {
             return items.size();
         }
+
     }
 
 }
