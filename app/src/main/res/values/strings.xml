@@ -2,5 +2,6 @@
     <string name="app_name">EarthquakeTrackingApp</string>
     <string name="near_the">Near of</string>
     <string name="perceived_strength">Perceived Strength</string>
+    <string name="no_internet_connection">No internet connection</string>
 
 </resources>

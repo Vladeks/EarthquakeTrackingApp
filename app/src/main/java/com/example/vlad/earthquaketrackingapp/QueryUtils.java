@@ -40,6 +40,14 @@ public class QueryUtils {
      * Query the USGS dataset and return a list of {@link Earthquake} objects.
      */
     public static List<Earthquake> fetchEarthquakeData(String requestUrl) {
+
+//        for testing load progress
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         URL url = createUrl(requestUrl);
         String jsonResponse = null;
         try {

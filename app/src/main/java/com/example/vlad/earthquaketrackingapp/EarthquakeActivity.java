@@ -1,12 +1,12 @@
 package com.example.vlad.earthquaketrackingapp;
 
 import android.app.LoaderManager;
-import android.content.AsyncTaskLoader;
-import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.databinding.DataBindingUtil;
 import android.graphics.drawable.GradientDrawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
@@ -19,6 +19,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.example.vlad.earthquaketrackingapp.databinding.EarthquakeItemBinding;
 
@@ -37,12 +39,23 @@ public class EarthquakeActivity extends AppCompatActivity
     public static final int LOADER_ID = 11;
     public static final String LOG_TAG = "EA";
     private EarthquakeAdapter adapter;
+    private ProgressBar progressBar;
+    private TextView twNoInternet;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_earthquake);
 
+        progressBar = (ProgressBar) findViewById(R.id.pb);
+        twNoInternet = (TextView) findViewById(R.id.tvInternetConnection);
+        twNoInternet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(LOG_TAG, "twNoInternet clicked");
+               loadData();
+            }
+        });
 
         RecyclerView rv = (RecyclerView) findViewById(R.id.rvQuakeList);
         rv.setLayoutManager(new LinearLayoutManager(this));
@@ -53,12 +66,27 @@ public class EarthquakeActivity extends AppCompatActivity
 //        task.execute(USGS_REQUEST_URL);
 //        Bundle bundle = new Bundle();
 //        bundle.putString(LOG_TAG, USGS_REQUEST_URL);
-        getLoaderManager().initLoader(LOADER_ID, null,this);
+
+        loadData();
+
+
+    }
+
+    private void loadData() {
+        ConnectivityManager manager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        NetworkInfo info = manager.getActiveNetworkInfo();
+        if(info != null && info.isConnected()) {
+            getLoaderManager().initLoader(LOADER_ID, null,this);
+            twNoInternet.setVisibility(View.GONE);
+        } else {
+            twNoInternet.setVisibility(View.VISIBLE);
+        }
 
     }
 
     @Override
     public Loader<List<Earthquake>> onCreateLoader(int id, Bundle args) {
+        progressBar.setVisibility(View.VISIBLE);
         Loader<List<Earthquake>> loader = null;
         if(id == LOADER_ID) {
             loader = new EarthquakeLoader(this, USGS_REQUEST_URL);
@@ -69,7 +97,13 @@ public class EarthquakeActivity extends AppCompatActivity
 
     @Override
     public void onLoadFinished(Loader<List<Earthquake>> loader, List<Earthquake> data) {
-        adapter.setData(data);
+        progressBar.setVisibility(View.GONE);
+        if (data != null && !data.isEmpty()) {
+            adapter.setData(data);
+        } else {
+            twNoInternet.setVisibility(View.VISIBLE);
+        }
+
     }
 
     @Override
