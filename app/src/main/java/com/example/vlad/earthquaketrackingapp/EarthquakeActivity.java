@@ -1,6 +1,10 @@
 package com.example.vlad.earthquaketrackingapp;
 
+import android.app.LoaderManager;
+import android.content.AsyncTaskLoader;
+import android.content.Context;
 import android.content.Intent;
+import android.content.Loader;
 import android.databinding.DataBindingUtil;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
@@ -11,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,15 +25,17 @@ import com.example.vlad.earthquaketrackingapp.databinding.EarthquakeItemBinding;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-public class EarthquakeActivity extends AppCompatActivity {
+public class EarthquakeActivity extends AppCompatActivity
+        implements LoaderManager.LoaderCallbacks<List<Earthquake>>{
 
     private static final String USGS_REQUEST_URL =
             "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&orderby=time&minmag=6&limit=10";
+    public static final int LOADER_ID = 11;
+    public static final String LOG_TAG = "EA";
     private EarthquakeAdapter adapter;
 
     @Override
@@ -42,8 +49,31 @@ public class EarthquakeActivity extends AppCompatActivity {
         adapter = new EarthquakeAdapter();
         rv.setAdapter(adapter);
 
-        EarthquakeAsyncTask task = new EarthquakeAsyncTask();
-        task.execute(USGS_REQUEST_URL);
+//        EarthquakeAsyncTask task = new EarthquakeAsyncTask();
+//        task.execute(USGS_REQUEST_URL);
+//        Bundle bundle = new Bundle();
+//        bundle.putString(LOG_TAG, USGS_REQUEST_URL);
+        getLoaderManager().initLoader(LOADER_ID, null,this);
+
+    }
+
+    @Override
+    public Loader<List<Earthquake>> onCreateLoader(int id, Bundle args) {
+        Loader<List<Earthquake>> loader = null;
+        if(id == LOADER_ID) {
+            loader = new EarthquakeLoader(this, USGS_REQUEST_URL);
+            Log.d(LOG_TAG, "onCreateLoader: " + loader.hashCode());
+        }
+        return loader;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<List<Earthquake>> loader, List<Earthquake> data) {
+        adapter.setData(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<Earthquake>> loader) {
 
     }
 
@@ -201,4 +231,4 @@ public class EarthquakeActivity extends AppCompatActivity {
         }
     }
 
-}
+   }
