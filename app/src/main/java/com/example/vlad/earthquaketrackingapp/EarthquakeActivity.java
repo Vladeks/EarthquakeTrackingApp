@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -26,6 +27,10 @@ import java.util.List;
 
 public class EarthquakeActivity extends AppCompatActivity {
 
+    private static final String USGS_REQUEST_URL =
+            "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&orderby=time&minmag=6&limit=10";
+    private EarthquakeAdapter adapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,9 +39,11 @@ public class EarthquakeActivity extends AppCompatActivity {
 
         RecyclerView rv = (RecyclerView) findViewById(R.id.rvQuakeList);
         rv.setLayoutManager(new LinearLayoutManager(this));
-        EarthquakeAdapter adapter = new EarthquakeAdapter();
-        adapter.setData(QueryUtils.extractEarthquakes());
+        adapter = new EarthquakeAdapter();
         rv.setAdapter(adapter);
+
+        EarthquakeAsyncTask task = new EarthquakeAsyncTask();
+        task.execute(USGS_REQUEST_URL);
 
     }
 
@@ -151,6 +158,7 @@ public class EarthquakeActivity extends AppCompatActivity {
         public void setData(List<Earthquake> data) {
             items.clear();
             items.addAll(data);
+            notifyDataSetChanged();
         }
 
         @NonNull
@@ -171,6 +179,26 @@ public class EarthquakeActivity extends AppCompatActivity {
             return items.size();
         }
 
+    }
+
+    private class EarthquakeAsyncTask extends AsyncTask<String, Void, List<Earthquake>> {
+
+        @Override
+        protected List<Earthquake> doInBackground(String... urls) {
+            if (urls.length < 1 || urls[0] == null) {
+                return null;
+            }
+
+            List<Earthquake> result = QueryUtils.fetchEarthquakeData(urls[0]);
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(List<Earthquake> data) {
+            if (data != null && !data.isEmpty()) {
+                adapter.setData(data);
+            }
+        }
     }
 
 }
